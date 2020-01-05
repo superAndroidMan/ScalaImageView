@@ -4,10 +4,14 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -50,8 +54,10 @@ public class ScalaImageView extends View implements GestureDetector.OnGestureLis
     }
 
     private void init() {
-
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint.setColor(Color.BLACK);
+        mPaint.setStrokeWidth(3);
+        mPaint.setStyle(Paint.Style.STROKE);
         bitmap = BitmapUtil.getAvatar(getContext().getResources(), R.mipmap.avatar,
                 DensityUtil.dip2px(getContext(), 300));
         gestureDetector = new GestureDetector(getContext(), this);
@@ -63,15 +69,18 @@ public class ScalaImageView extends View implements GestureDetector.OnGestureLis
         return gestureDetector.onTouchEvent(event);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.translate(offsetX, offsetY);
-
-        float scale = smallScale + (bigScale - smallScale) * scaleFraction;
-        canvas.scale(scale, scale, getWidth() / 2f, getHeight() / 2f);
-        canvas.drawBitmap(bitmap, originalOffsetX, originalOffsetY, mPaint);
+//        canvas.translate(offsetX * scaleFraction, offsetY * scaleFraction);
+//
+//        float scale = smallScale + (bigScale - smallScale) * scaleFraction;
+//        canvas.scale(scale, scale, getWidth() / 2f, getHeight() / 2f);
+//        canvas.drawBitmap(bitmap, originalOffsetX, originalOffsetY, mPaint);
+        RectF rect = new RectF(0,0,300,300);
+        canvas.drawArc(rect,0,90,false,mPaint);
     }
 
     @Override
@@ -131,7 +140,6 @@ public class ScalaImageView extends View implements GestureDetector.OnGestureLis
 
     @Override
     public void onLongPress(MotionEvent e) {
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -160,9 +168,6 @@ public class ScalaImageView extends View implements GestureDetector.OnGestureLis
         if (isBig) {
             getScaleAnimator().start();
         } else {
-            //回到初始位置
-            offsetX = 0;
-            offsetY = 0;
             getScaleAnimator().reverse();
         }
         return false;
